@@ -1,34 +1,26 @@
-FROM ahmet2mir/debian:wheezy
-MAINTAINER Ahmet Demir <ahmet2mir+github@gmail.com>
-
-ENV RELEASE wheezy
-ENV DEBIAN_FRONTEND noninteractive
-ENV SHELL /bin/bash
+FROM suixo/docker-nginx-php:latest
+MAINTAINER Mickaël Bergem <mickael@securem.eu>
 
 # Curl extension
-RUN apt-get update && apt-get install -y nginx php5-fpm php5-curl php5-sqlite php5-json 
+RUN apt-get update && apt-get install -y curl unzip
 
-# Adding files
-ADD . /docker
+RUN gpg --recv-keys --keyserver pgp.mit.edu 87DA4591
 
 RUN mkdir -p /webapps/rainloop /webapps/logs/rainloop && \
 	cd /tmp && \
-	curl -R -L -O "http://repository.rainloop.net/v1/rainloop-latest.zip" && \
-	unzip rainloop-latest.zip -d /webapps/rainloop && \
+	curl -R -L -O "http://repository.rainloop.net/v2/webmail/rainloop-community-latest.zip" && \
+	curl -R -L -O "http://repository.rainloop.net/v2/webmail/rainloop-community-latest.zip.asc" && \
+    gpg --verify rainloop-community-latest.zip.asc rainloop-community-latest.zip && \
+	unzip rainloop-community-latest.zip -d /webapps/rainloop && \
 	find /webapps/rainloop -type d -exec chmod 755 {} \; && \
 	find /webapps/rainloop -type f -exec chmod 644 {} \; && \
 	chown -R www-data:www-data /webapps/rainloop && \
-	cp -f /docker/assets/conf/nginx.conf /etc/nginx/nginx.conf &&  \
-	cp -f /docker/assets/conf/nginx-rainloop.conf /etc/nginx/sites-available/rainloop.conf &&  \
-	ln -s /etc/nginx/sites-available/rainloop.conf /etc/nginx/sites-enabled/rainloop.conf && \
+	# ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default && \
 	sed -i 's/;daemonize = yes/daemonize = no/g' /etc/php5/fpm/php-fpm.conf
 
-# "Configure services"
-# Based on https://github.com/mingfang/docker-salt
-RUN for dir in /docker/services/*;\
-    do echo $dir; chmod +x $dir/run $dir/log/run;\
-    ln -sf $dir /etc/service/; done
+# Adding files
+# ADD conf/nginx.conf /etc/nginx/nginx.conf
+ADD conf/nginx-rainloop.conf /etc/nginx/sites-available/default
 
 # Expose services
-EXPOSE 22 80
-
+EXPOSE 80 443
