@@ -15,11 +15,10 @@ RUN mkdir -p /webapps/rainloop /webapps/logs/rainloop && \
 	find /webapps/rainloop -type d -exec chmod 755 {} \; && \
 	find /webapps/rainloop -type f -exec chmod 644 {} \; && \
 	chown -R www-data:www-data /webapps/rainloop && \
-	# ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default && \
-	sed -i 's/;daemonize = yes/daemonize = no/g' /etc/php5/fpm/php-fpm.conf
+    rm /tmp/rainloop-community-latest.zip /tmp/rainloop-community-latest.zip.asc && \
+    sed -i 's/;daemonize = yes/daemonize = no/g' /etc/php5/fpm/php-fpm.conf
 
 # Adding files
-# ADD conf/nginx.conf /etc/nginx/nginx.conf
 ADD conf/nginx-rainloop.conf /etc/nginx/sites-available/default
 
 # Expose services
