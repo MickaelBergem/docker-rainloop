@@ -21,5 +21,9 @@ RUN mkdir -p /webapps/rainloop /webapps/logs/rainloop && \
 # Adding files
 ADD conf/nginx-rainloop.conf /etc/nginx/sites-available/default
 
+# Add application configuration file
+ADD conf/rainloop-application.ini /webapps/rainloop/data/_data_/_default_/configs/application.ini
+RUN chown -R www-data:www-data /webapps/rainloop/data
+
 # Expose services
 EXPOSE 80 443
